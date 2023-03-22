@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io' show Platform;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -10,15 +11,48 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String _selectedCurrency = 'USD';
 
-  List<DropdownMenuItem<String>> gertDropdownItems() {
+  DropdownButton getAndroidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
 
-    for(String item in currenciesList) {
-      dropdownItems.add(
-          DropdownMenuItem(value: item, child: Text(item))
-      );
+    for (String item in currenciesList) {
+      dropdownItems.add(DropdownMenuItem(value: item, child: Text(item)));
     }
-    return dropdownItems;
+
+    return DropdownButton<String>(
+      value: _selectedCurrency,
+      items: dropdownItems,
+      onChanged: (value) {
+        setState(() {
+          _selectedCurrency = value!;
+        });
+      },
+    );
+  }
+
+  CupertinoPicker getIOSPicker() {
+    List<Widget> dropdownItems = [];
+
+    for (String item in currenciesList) {
+      dropdownItems.add(Text(item));
+    }
+
+    return CupertinoPicker(
+      itemExtent: 32.0,
+      onSelectedItemChanged: (selectedIndex) {
+        print(selectedIndex);
+      },
+      children: dropdownItems,
+    );
+  }
+
+  Widget getPicker() {
+    if(Platform.isAndroid) {
+      return getAndroidDropdown();
+    } else if(Platform.isIOS) {
+      return getIOSPicker();
+    } else {
+      throw 'The using platform is not supported';
+    }
   }
 
   @override
@@ -57,26 +91,7 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: const EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            // child: DropdownButton<String>(
-            //   value: _selectedCurrency,
-            //   items: gertDropdownItems(),
-            //   onChanged: (value) {
-            //     setState((){
-            //       _selectedCurrency = value!;
-            //     });
-            //   },
-            // ),
-            child: CupertinoPicker(
-              itemExtent: 32.0,
-              onSelectedItemChanged: (selectedIndex) {
-                print(selectedIndex);
-              },
-              children: [
-                Text('USD'),
-                Text('EUR'),
-                Text('GBP'),
-              ],
-            ),
+            child: getPicker(),
           ),
         ],
       ),
