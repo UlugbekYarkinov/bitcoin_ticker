@@ -1,3 +1,4 @@
+import 'package:bitcoin_ticker/crypto_card.dart';
 import 'package:flutter/material.dart';
 import 'package:bitcoin_ticker/coin_data.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,7 +11,8 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String _selectedCurrency = 'USD';
-  String bitcoinValue = '?';
+  Map<String, String> cryptoCurrencies = {};
+  bool isWaiting = true;
 
   DropdownButton getAndroidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
@@ -49,9 +51,11 @@ class _PriceScreenState extends State<PriceScreen> {
 
   void getData() async {
     try {
-      double coinData = await CoinData().getCoinData(_selectedCurrency);
+      Map<String, String> coinsData = await CoinData().getCoinData(_selectedCurrency);
+      isWaiting = false;
+
       setState(() {
-        bitcoinValue = coinData.toStringAsFixed(2);
+        cryptoCurrencies = coinsData;
       });
     } catch(e) {
       print(e);
@@ -74,26 +78,25 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CryptoCard(
+                cryptoLabel: 'BTC',
+                bitcoinValue: isWaiting ? '?' : cryptoCurrencies['BTC']!,
+                selectedCurrency: _selectedCurrency,
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 BTC = $bitcoinValue $_selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
+              CryptoCard(
+                cryptoLabel: 'ETH',
+                bitcoinValue: isWaiting ? '?' : cryptoCurrencies['ETH']!,
+                selectedCurrency: _selectedCurrency,
               ),
-            ),
+              CryptoCard(
+                cryptoLabel: 'LTC',
+                bitcoinValue: isWaiting ? '?' : cryptoCurrencies['LTC']!,
+                selectedCurrency: _selectedCurrency,
+              ),
+            ],
           ),
           Container(
             height: 150.0,
